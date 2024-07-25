@@ -1,4 +1,4 @@
-from secrets import DISCORD_TOKEN, SERVER_TOKEN
+from secrets import DISCORD_TOKEN, SERVER_TOKEN, GENERAL_ID
 
 import datetime
 import discord
@@ -64,7 +64,7 @@ async def on_message(message):
         await add_score(message.content.split(), message)
     if message.content == '!first_scoreboard':
         await message.channel.send(get_scoreboard())
-    if first == False:
+    if first == False or message.channel.id != GENERAL_ID:
         return
     if message.author == client.user:
         return
