@@ -4,6 +4,8 @@ import datetime
 import discord
 
 import schedule
+import pickle
+import os
 
 first = True
 
@@ -15,6 +17,8 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
+# ----------------------------------------------------------------
+
 def check_day():
     global first
     first = True
@@ -22,8 +26,12 @@ def check_day():
 
 schedule.every().day.at("00:00", "Europe/Amsterdam").do(check_day)
 
+# ----------------------------------------------------------------
+
 def get_scoreboard():
-    global first_dict
+    global first
+    with open('scores.pkl', 'rb') as file:
+        first_dict = pickle.load(file)
     global member_list
     result = []
     for member in member_list:
@@ -32,7 +40,8 @@ def get_scoreboard():
     return ('\n'.join(result))
 
 async def add_score(args, message):
-    global first_dict
+    with open('scores.pkl', 'rb') as file:
+        first_dict = pickle.load(file)
     global member_list
     id = 0
     for member in member_list:
@@ -42,6 +51,8 @@ async def add_score(args, message):
         await message.channel.send('nom incorrect')
         return
     first_dict[id] = int(args[2])
+    with open('scores.pkl', 'wb') as file:
+        pickle.dump(first_dict, file)
     await message.channel.send(f'{args[1]} a désormais {first_dict[id]} first')
 
 @client.event
@@ -57,7 +68,11 @@ async def on_message(message):
         return
     if message.author == client.user:
         return
+    with open('scores.pkl', 'rb') as file:
+        first_dict = pickle.load(file)
     first_dict[message.author.id] += 1
+    with open('scores.pkl', 'wb') as file:
+        pickle.dump(first_dict, file)
     response = f'gg {message.author.display_name} pour ton {first_dict[message.author.id]}e first ! :D'
     await message.channel.send(response)
     first = False
@@ -72,6 +87,10 @@ async def on_ready():
         member_list = [member for member in guild.members]
     for member in member_list:
         first_dict[member.id] = 0
+    if not os.path.exists("scores.pkl"):
+        with open('scores.pkl', 'wb') as file:
+            pickle.dump(first_dict, file)
+
 
 
 client.run(DISCORD_TOKEN)
