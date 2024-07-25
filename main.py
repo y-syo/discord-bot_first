@@ -7,7 +7,7 @@ import schedule
 import pickle
 import os
 
-first = True
+first = False
 
 first_dict = dict()
 member_list = []
@@ -30,13 +30,15 @@ schedule.every().day.at("00:00", "Europe/Amsterdam").do(check_day)
 
 def get_scoreboard():
     global first
+    global member_list
     with open('scores.pkl', 'rb') as file:
         first_dict = pickle.load(file)
-    global member_list
     result = []
-    for member in member_list:
-        if (first_dict[member.id] > 0):
-            result.append(f'{member.display_name} : {first_dict[member.id]}')
+    for member in first_dict.keys():
+        if (first_dict[member] > 0):
+            for m in member_list:
+                if m.id == member:
+                    result.append(f'{m.display_name} : {first_dict[member]}')
     return ('\n'.join(result))
 
 async def add_score(args, message):
@@ -84,8 +86,10 @@ async def on_ready():
     print(f'{client.user} has connected to Discord!')
     for guild in client.guilds:
         print(f'{guild.id} : {SERVER_TOKEN}')
-        member_list = [member for member in guild.members]
+        if guild.id == SERVER_TOKEN:
+            member_list = [member for member in guild.members]
     for member in member_list:
+        print(member.name)
         first_dict[member.id] = 0
     if not os.path.exists("scores.pkl"):
         with open('scores.pkl', 'wb') as file:
