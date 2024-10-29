@@ -29,8 +29,10 @@ schedule.every().day.at("00:00", "Europe/Amsterdam").do(check_day)
 # ----------------------------------------------------------------
 
 def get_scoreboard():
-    global first
-    global member_list
+    member_list = []
+    for guild in client.guilds:
+        if guild.id == SERVER_TOKEN:
+            member_list = [member for member in guild.members]
     with open('scores.pkl', 'rb') as file:
         first_dict = pickle.load(file)
     result = []
@@ -44,7 +46,10 @@ def get_scoreboard():
 async def add_score(args, message):
     with open('scores.pkl', 'rb') as file:
         first_dict = pickle.load(file)
-    global member_list
+    member_list = []
+    for guild in client.guilds:
+        if guild.id == SERVER_TOKEN:
+            member_list = [member for member in guild.members]
     id = 0
     for member in member_list:
         if (member.name == args[1]):
