@@ -77,7 +77,10 @@ async def on_message(message):
         return
     with open('scores.pkl', 'rb') as file:
         first_dict = pickle.load(file)
-    first_dict[message.author.id] += 1
+    if message.author.id in first_dict.keys():
+        first_dict[message.author.id] += 1
+    else:
+        first_dict[message.author.id] = 1
     with open('scores.pkl', 'wb') as file:
         pickle.dump(first_dict, file)
     response = f'gg {message.author.display_name} pour ton {first_dict[message.author.id]}e first ! :D'
